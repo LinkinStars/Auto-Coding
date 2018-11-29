@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>sql 2 pojo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
+
+</head>
+<body>
+
+<div class="page-header" style="width: 50%; margin: auto;">
+    <h1>change sql 2 java pojo<small></small></h1>
+</div>
+
+<form style="height: 300px; width: 50%; margin: auto;">
+    <div class="form-group">
+        <label for="sql">SQL:</label>
+        <textarea class="form-control" id="sql" rows="10">
+CREATE TABLE `user_tab` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户id',
+  `val` varchar(255) NOT NULL COMMENT '用户的值',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB COMMENT='用户';
+        </textarea>
+    </div>
+    
+    <div class="form-group">
+        <label for="packageName">PackageName</label>
+        <input type="text" class="form-control" id="packageName" value="com.linkinstars.bean"/>
+    </div>
+    
+    <div class="form-group">
+        <label for="ignoreName">IgnoreName</label>(表名中需要忽略的字符)
+        <input type="text" class="form-control" id="ignoreName" value="_tab"/>
+    </div>
+    
+    <div class="form-group">
+        <label for="ignoreName">表名中的字段以什么方式命名</label>
+        <select id ="isUnderscore" class="selectpicker">
+            <option value="1" data-tokens="ketchup mustard">小驼峰</option>
+            <option value="2" data-tokens="ketchup mustard">下划线分割</option>
+        </select>
+    </div>
+
+    
+    <div class="form-group">
+        <label for="pojoSuffix">PojoSuffix</label>(生成的实体类的后缀名)
+        <input type="text" class="form-control" id="pojoSuffix" value="DO"/>
+    </div>
+
+    <div class="form-group">
+        <label for="author">Author</label>
+        <input type="text" class="form-control" id="author" value="LinkinStar"/>
+    </div>
+    
+    <div class="form-group">
+        <button class="btn btn-success" type="button" onclick="sql2pojo();" style="width: 100px">change</button>
+    </div>
+</form>
+
+
+<script type="text/javascript" src="../static/js/jquery-2.1.4.min.js" th:src="@{/js/jquery-2.1.4.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/download.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+
+<script type="text/javascript" th:inline="javascript">
+    var basePath = /*[[${#httpServletRequest.getScheme() + "://" + #httpServletRequest.getServerName() + ":" + #httpServletRequest.getServerPort() + #httpServletRequest.getContextPath()}]]*/;
+    
+   function sql2pojo() {
+       var sql = $("#sql").val() || '';
+       var packageName = $("#packageName").val();
+       var ignoreName = $("#ignoreName").val();
+       var pojoSuffix = $("#pojoSuffix").val();
+       var isUnderscore = $("#isUnderscore").val();
+       var author = $("#author").val();
+
+       if (sql.length < 1) {
+           alert("sql can not be null");
+           return;
+       }
+       
+       $.ajax({
+           url: basePath + "/sql2pojo", //方法路径URL
+           data: {
+               sql : sql,
+               packageName : packageName,
+               ignoreName : ignoreName,
+               pojoSuffix : pojoSuffix,
+               isUnderscore : isUnderscore,
+               author : author
+           },
+           dataType: 'json',
+           type: 'POST',
+           async: true, //默认异步调用 (false：同步)
+           success: function (result) {
+               if (result.code == 1) {
+                   download( result.data, "", "");
+                   //window.location.href = basePath + result.data;
+               } else {
+                   alert(result.message);
+               }
+           },
+           error: function (e) {
+               alert("后台出现异常")
+           }
+       });
+   }
+</script>
+</body>
+</html>
