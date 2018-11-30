@@ -14,24 +14,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.linkinstars.autocoding.util.StaticPath.*;
+
 /**
  * 模板制作工具
  * @author LinkinStar
  */
 public class TemplateUtil {
     
+    /** 模板 **/
     private static Template template;
 
-    /** 绝对路径 **/
-    private static String absolutePath = "";
-
-    /** 静态目录 **/
-    private static String staticDir = "static/";
-    
-    /** 下载目录 **/
-    private static String downloadPath = "download/";
-
-    
     public static void init() throws IOException {
         //获取跟目录
         File file = null;
@@ -85,6 +78,6 @@ public class TemplateUtil {
         out.flush();
         out.close();
         
-        return resultPath;
+        return pojoMaker.getClassName() + ".java";
     }
 }

@@ -27,4 +27,7 @@ JdbcType2JavaType.java
 ## 项目中用到的技术
 springboot + freemarker
 
+## 更新
+1.0.1 新增上传sql文件方式转换，上传navicat导出的建表sql语句即可
+
 

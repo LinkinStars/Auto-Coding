@@ -6,7 +6,6 @@
     <title>sql 2 pojo</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
-
 </head>
 <body>
 
@@ -16,7 +15,13 @@
 
 <form style="height: 300px; width: 50%; margin: auto;">
     <div class="form-group">
-        <label for="sql">SQL:</label>
+        <select class="selectpicker" onchange="showSqlDiv()">
+            <option data-tokens="ketchup mustard">SQL:</option>
+            <option data-tokens="ketchup mustard">SQL File:</option>
+        </select>
+    </div>
+    
+    <div id="sqlstrDiv" class="form-group">
         <textarea class="form-control" id="sql" rows="10">
 CREATE TABLE `user_tab` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '用户id',
@@ -24,6 +29,14 @@ CREATE TABLE `user_tab` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB COMMENT='用户';
         </textarea>
+    </div>
+
+    <div id="sqlFileDiv" class="form-group">
+        <div class="input-append">
+            <input id="sqlFileInput" class="input-large" type="text" style="height:30px;">
+            <a class="btn" onclick="$('input[id=sqlFile]').click();">Browse</a>
+        </div>
+        <input type="file" id="sqlFile" class="btn btn-default" style="display:none"/>
     </div>
     
     <div class="form-group">
@@ -47,7 +60,7 @@ CREATE TABLE `user_tab` (
     
     <div class="form-group">
         <label for="pojoSuffix">PojoSuffix</label>(生成的实体类的后缀名)
-        <input type="text" class="form-control" id="pojoSuffix" value="DO"/>
+        <input type="text" class="form-control" id="pojoSuffix"  value="DO"/>
     </div>
 
     <div class="form-group">
@@ -58,6 +71,7 @@ CREATE TABLE `user_tab` (
     <div class="form-group">
         <button class="btn btn-success" type="button" onclick="sql2pojo();" style="width: 100px">change</button>
     </div>
+
 </form>
 
 
@@ -69,8 +83,31 @@ CREATE TABLE `user_tab` (
 
 <script type="text/javascript" th:inline="javascript">
     var basePath = /*[[${#httpServletRequest.getScheme() + "://" + #httpServletRequest.getServerName() + ":" + #httpServletRequest.getServerPort() + #httpServletRequest.getContextPath()}]]*/;
+
+
+    $('input[id=sqlFile]').change(function() {
+        $('#sqlFileInput').val($(this).val());
+    });
+
+    $("#sqlFileDiv").hide();
+    var isSqlFile = false;
+    function showSqlDiv() {
+        if (isSqlFile) {
+            $("#sqlstrDiv").show();
+            $("#sqlFileDiv").hide();
+            isSqlFile = false;
+        } else {
+            $("#sqlstrDiv").hide();
+            $("#sqlFileDiv").show();
+            isSqlFile = true;
+        }
+    }
     
    function sql2pojo() {
+       if (isSqlFile) {
+           return sqlFile2pojo();
+       }
+        
        var sql = $("#sql").val() || '';
        var packageName = $("#packageName").val();
        var ignoreName = $("#ignoreName").val();
@@ -99,7 +136,6 @@ CREATE TABLE `user_tab` (
            success: function (result) {
                if (result.code == 1) {
                    download( result.data, "", "");
-                   //window.location.href = basePath + result.data;
                } else {
                    alert(result.message);
                }
@@ -109,6 +145,41 @@ CREATE TABLE `user_tab` (
            }
        });
    }
+
+    function sqlFile2pojo() {
+        var sqlFile = document.getElementById('sqlFile').files[0];
+        var packageName = $("#packageName").val();
+        var ignoreName = $("#ignoreName").val();
+        var pojoSuffix = $("#pojoSuffix").val();
+        var isUnderscore = $("#isUnderscore").val();
+        var author = $("#author").val();
+
+        var data = new FormData();
+        data.append('sqlFile', sqlFile);
+        data.append('packageName', packageName);
+        data.append('pojoSuffix', pojoSuffix);
+        data.append('ignoreName', ignoreName);
+        data.append('isUnderscore', isUnderscore);
+        data.append('author', author);
+
+        $.ajax({
+            url : basePath + "/sqlFile2pojo", //方法路径URL
+            type:'POST',
+            data: data,
+            processData:false,  //tell jQuery not to process the data
+            contentType: false,  //tell jQuery not to set contentType
+            //这儿的三个参数其实就是XMLHttpRequest里面带的信息。
+            success:function (result) {
+                if (result.code == 1) {
+                    //download( result.data, "", "");
+                    window.location.href = basePath + "/" + result.data;
+                } else {
+                    alert(result.message);
+                }
+            }
+
+        })
+    }
 </script>
 </body>
 </html>

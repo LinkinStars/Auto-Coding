@@ -21,7 +21,7 @@ public class ${className} {
      */
     </#if>
 	public ${(field.type)!""} get${(field.name)?cap_first!""}() {
-		 return ${(field.name)!""};
+        return ${(field.name)!""};
 	}
 
     <#if field.comment?? && field.comment != "">
@@ -30,7 +30,7 @@ public class ${className} {
      */
     </#if>
 	public void set${(field.name)?cap_first!""}(${(field.type)!""} ${(field.name)!""}) {
-		 this.${(field.name)!""} = ${(field.name)!""};
+        this.${(field.name)!""} = ${(field.name)!""};
 	}
 
 </#list>

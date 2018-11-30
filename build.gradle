@@ -33,6 +33,9 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.springframework.boot:spring-boot-starter-thymeleaf')
     compile group: 'net.sourceforge.nekohtml', name: 'nekohtml', version: '1.9.22'
+
+    //  热部署相关
+    compile("org.springframework.boot:spring-boot-devtools")
     
     // 模板引擎
     compile group: 'org.freemarker', name: 'freemarker', version: '2.3.28'
