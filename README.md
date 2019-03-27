@@ -2,13 +2,13 @@ Auto-Coding
 ===========
 
 # Sql2Pojo
-**change sql 2 java pojo**
+**change sql 2 pojo**
 
 ## 前言
 当我们设计完成数据库之后，通常需要创建对应的实体类，有的称为Entity，有的称为DO，都是一个意思，而自己一个个去写非常的麻烦，所以麻烦的时候就需要相应的自动工具类解决这样的麻烦。
 
 ## 最后结果
-http://www.linkinstars.com/auto-code
+http://www.linkinstars.com:8090/auto-code
 
 使用起来非常简单，输入对应需要的参数，点击change即可生成你需要的实体类。
 sql可以从navicat等类似工具中获得，这里不做赘述。
@@ -28,6 +28,8 @@ JdbcType2JavaType.java
 springboot + freemarker
 
 ## 更新
+1.0.2 新增语言选项可以选择golang语言（内测中，有问题请反馈)
+
 1.0.1 新增上传sql文件方式转换，上传navicat导出的建表sql语句即可
 
 

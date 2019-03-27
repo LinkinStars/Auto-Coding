@@ -1,5 +1,6 @@
 package com.linkinstars.autocoding.util;
 
+import com.google.common.base.CaseFormat;
 import com.linkinstars.autocoding.model.POJOmaker;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -22,8 +23,10 @@ import static com.linkinstars.autocoding.util.StaticPath.*;
  */
 public class TemplateUtil {
     
-    /** 模板 **/
-    private static Template template;
+    /** java模板 **/
+    private static Template javaTemplate;
+    /** golang模板 **/
+    private static Template goTemplate;
 
     public static void init() throws IOException {
         //获取跟目录
@@ -43,12 +46,15 @@ public class TemplateUtil {
             upload.mkdirs();
         }
 
-        ClassPathResource classPathResource = new ClassPathResource("ftl/pojo.ftl");
+        ClassPathResource javaClassPathResource = new ClassPathResource("ftl/pojo.ftl");
+        ClassPathResource goClassPathResource = new ClassPathResource("ftl/golang-pojo.ftl");
         
         //存文件
-        File ftlFile = new File(absolutePath, staticDir + "ftl/pojo.ftl");
+        File javaFtlFile = new File(absolutePath, staticDir + "ftl/pojo.ftl");
+        File goFtlFile = new File(absolutePath, staticDir + "ftl/golang-pojo.ftl");
         try {
-            FileUtils.copyInputStreamToFile(classPathResource.getInputStream(), ftlFile);
+            FileUtils.copyInputStreamToFile(javaClassPathResource.getInputStream(), javaFtlFile);
+            FileUtils.copyInputStreamToFile(goClassPathResource.getInputStream(), goFtlFile);
         } catch (IOException e) {
             throw e;
         }
@@ -59,25 +65,54 @@ public class TemplateUtil {
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         cfg.setLogTemplateExceptions(false);
         cfg.setWrapUncheckedExceptions(true);
-        template = cfg.getTemplate("pojo.ftl");
+        javaTemplate = cfg.getTemplate("pojo.ftl");
+        goTemplate = cfg.getTemplate("golang-pojo.ftl");
     }
-    
-    public static String writePOJOmakerToTemplate(POJOmaker pojoMaker) throws IOException, TemplateException {
-        Map<String, Object> map = new HashMap<>(3);
+
+    /**
+     * 将java对象写入模板
+     */
+    public static String writeJavaPOJOmakerToTemplate(POJOmaker pojoMaker) throws IOException, TemplateException {
+        Map<String, Object> map = new HashMap<>(10);
+        map.put("className", pojoMaker.getClassName());
+        map.put("packageName", pojoMaker.getPackageName());
+        map.put("fieldList", pojoMaker.getFieldList());
+        map.put("classComment", pojoMaker.getClassComment());
+        map.put("author", pojoMaker.getAuthor());
+
+        String resultPath = downloadPath + pojoMaker.getClassName() + ".java";
+
+        FileOutputStream fos = new FileOutputStream(new File(absolutePath, staticDir + resultPath));
+        Writer out = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+        javaTemplate.process(map, out);
+        out.flush();
+        out.close();
+
+        return pojoMaker.getClassName() + ".java";
+    }
+
+    /**
+     * 将golang对象写入模板
+     */
+    public static String writeGoPOJOmakerToTemplate(POJOmaker pojoMaker) throws IOException, TemplateException {
+        Map<String, Object> map = new HashMap<>(10);
         map.put("className", pojoMaker.getClassName());
         map.put("packageName", pojoMaker.getPackageName());
         map.put("fieldList", pojoMaker.getFieldList());
         map.put("classComment", pojoMaker.getClassComment());
         map.put("author", pojoMaker.getAuthor());
         
-        String resultPath = downloadPath + pojoMaker.getClassName() + ".java";
+        //golang以下划线命名，所需将对象的名称转换为下划线作为输出文件的名称
+        String fileName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, pojoMaker.getClassName());
+
+        String resultPath = downloadPath + fileName + ".go";
 
         FileOutputStream fos = new FileOutputStream(new File(absolutePath, staticDir + resultPath));
         Writer out = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
-        template.process(map, out);
+        goTemplate.process(map, out);
         out.flush();
         out.close();
-        
-        return pojoMaker.getClassName() + ".java";
+
+        return fileName + ".go";
     }
 }

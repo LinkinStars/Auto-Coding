@@ -10,10 +10,18 @@
 <body>
 
 <div class="page-header" style="width: 50%; margin: auto;">
-    <h1>change sql 2 java pojo<small></small></h1>
+    <h1>change sql 2 pojo<small></small></h1>
 </div>
 
 <form style="height: 300px; width: 50%; margin: auto;">
+    Language
+    <div class="form-group">
+        <select id="languageType" name="languageType" class="selectpicker">
+            <option value="1" data-tokens="ketchup mustard">Java</option>
+            <option value="2" data-tokens="ketchup mustard">Golang</option>
+        </select>
+    </div>
+    SQL Type
     <div class="form-group">
         <select class="selectpicker" onchange="showSqlDiv()">
             <option data-tokens="ketchup mustard">SQL:</option>
@@ -114,6 +122,7 @@ CREATE TABLE `user_tab` (
        var pojoSuffix = $("#pojoSuffix").val();
        var isUnderscore = $("#isUnderscore").val();
        var author = $("#author").val();
+       var languageType = $("#languageType").val();
 
        if (sql.length < 1) {
            alert("sql can not be null");
@@ -128,7 +137,8 @@ CREATE TABLE `user_tab` (
                ignoreName : ignoreName,
                pojoSuffix : pojoSuffix,
                isUnderscore : isUnderscore,
-               author : author
+               author : author,
+               languageType : languageType
            },
            dataType: 'json',
            type: 'POST',
@@ -153,6 +163,7 @@ CREATE TABLE `user_tab` (
         var pojoSuffix = $("#pojoSuffix").val();
         var isUnderscore = $("#isUnderscore").val();
         var author = $("#author").val();
+        var languageType = $("#languageType").val();
 
         var data = new FormData();
         data.append('sqlFile', sqlFile);
@@ -161,6 +172,7 @@ CREATE TABLE `user_tab` (
         data.append('ignoreName', ignoreName);
         data.append('isUnderscore', isUnderscore);
         data.append('author', author);
+        data.append('languageType', languageType);
 
         $.ajax({
             url : basePath + "/sqlFile2pojo", //方法路径URL

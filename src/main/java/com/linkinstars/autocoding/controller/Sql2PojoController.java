@@ -29,7 +29,7 @@ public class Sql2PojoController {
     @RequestMapping("/sql2pojo")
     @ResponseBody
     public CommonResponse sql2pojo(String sql, String packageName, String ignoreName, String pojoSuffix, 
-                                   int isUnderscore, String author) throws Exception {
+                                   int isUnderscore, String author, int languageType) throws Exception {
         sql = sql.trim();
         if (StringUtils.isEmpty(sql)) {
             return CommonResponse.fail("sql为空");
@@ -45,7 +45,8 @@ public class Sql2PojoController {
             return CommonResponse.fail("createTable语句有误");
         }
 
-        String downloadUrl = ResolveSqlUtil.resolve(sql, packageName, ignoreName, pojoSuffix, isUnderscore, author);
+        String downloadUrl = ResolveSqlUtil.resolve(sql, packageName, 
+                ignoreName, pojoSuffix, isUnderscore, author, languageType);
         if (StringUtils.isEmpty(downloadUrl)) {
             return new CommonResponse(2, "失败", "");
         }
@@ -55,7 +56,7 @@ public class Sql2PojoController {
     @RequestMapping("/sqlFile2pojo")
     @ResponseBody
     public CommonResponse sqlFile2pojo(MultipartFile sqlFile, String packageName, String ignoreName, String pojoSuffix,
-                                    int isUnderscore, String author) throws Exception {
+                                    int isUnderscore, String author, int languageType) throws Exception {
         if (sqlFile == null || sqlFile.isEmpty()) {
             return CommonResponse.fail("sql为空");
         }
@@ -84,7 +85,7 @@ public class Sql2PojoController {
                 }
             }
             String downloadUrl = ResolveSqlUtil.resolve(sql.toString(), packageName, 
-                    ignoreName, pojoSuffix, isUnderscore, author);
+                    ignoreName, pojoSuffix, isUnderscore, author, languageType);
             if (!StringUtils.isEmpty(downloadUrl)) {
                 javaClassNameList.add(downloadUrl);
             }

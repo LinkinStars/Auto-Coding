@@ -1,6 +1,7 @@
 package com.linkinstars.autocoding.util;
 
 import com.google.common.base.CaseFormat;
+import com.linkinstars.autocoding.model.JdbcType2GolangType;
 import com.linkinstars.autocoding.model.JdbcType2JavaType;
 import com.linkinstars.autocoding.model.POJOfield;
 import com.linkinstars.autocoding.model.POJOmaker;
@@ -9,12 +10,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 解析sql工具类
  * @author LinkinStar
  */
 public class ResolveSqlUtil {
-    
+
+    /**
+     * @param sql sql语句
+     * @param packageName 包名
+     * @param ignoreName 表名的前缀或者后缀如：_tab
+     * @param pojoSuffix 实体类的后缀如：DO
+     * @param isUnderscore 是否是下划线命名
+     * @param author 作者
+     * @param languageType 语言类型1：java，2：golang
+     * @return 下载地址
+     * @throws Exception
+     */
     public static String resolve(String sql, String packageName, String ignoreName, String pojoSuffix,
-                                 int isUnderscore, String author) throws Exception {
+                                 int isUnderscore, String author, int languageType) throws Exception {
         String[] sqlArray = sql.split("\n");
 
         String[] createTableArray = sqlArray[0].split(" ");
@@ -30,7 +43,7 @@ public class ResolveSqlUtil {
         //处理所有字段
         List<POJOfield> pojoFieldList = new ArrayList<>();
         for (int i = 1; i < sqlArray.length - 1; i++) {
-            POJOfield pojoField = handleField(sqlArray[i], isUnderscore);
+            POJOfield pojoField = handleField(sqlArray[i], isUnderscore, languageType);
             if (pojoField != null) {
                 pojoFieldList.add(pojoField);
             }
@@ -43,7 +56,13 @@ public class ResolveSqlUtil {
         pojoMaker.setAuthor(author);
 
         //生成模板并返回下载地址
-        return TemplateUtil.writePOJOmakerToTemplate(pojoMaker);
+        if (languageType == 1) {
+            return TemplateUtil.writeJavaPOJOmakerToTemplate(pojoMaker);
+        } else if (languageType == 2) {
+            return TemplateUtil.writeGoPOJOmakerToTemplate(pojoMaker);
+        } else {
+            return "";
+        }
     }
 
     /**
@@ -67,9 +86,11 @@ public class ResolveSqlUtil {
     /**
      * 处理pojo的所有字段
      * @param rawField 字段
+     * @param isUnderscore 是否是下划线命名
+     * @param languageType 语言类型1：java，2：golang
      * @return Ppjo的实体类
      */
-    private static POJOfield handleField(String rawField, int isUnderscore){
+    private static POJOfield handleField(String rawField, int isUnderscore, int languageType){
         rawField = rawField.trim();
         String[] fieldArr = rawField.split(" ");
 
@@ -83,14 +104,31 @@ public class ResolveSqlUtil {
         if (isUnderscore == 2) {
             field = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, field);
         }
+        
+        //如果是golang需要大驼峰
+        if (languageType == 2) {
+            field = CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, field);
+        }
 
         POJOfield pojoField = new POJOfield();
         pojoField.setName(field);
 
         //将数据库类型转换为java类型
-        String type = JdbcType2JavaType.map.get(fieldArr[1].toUpperCase().replaceAll("[^a-z^A-Z]", ""));
-        if (type == null) {
-            type = "Object";
+        String type;
+        if (languageType == 1) {
+            type = JdbcType2JavaType.map.get(fieldArr[1].toUpperCase().replaceAll("[^a-z^A-Z]", ""));
+            if (type == null) {
+                type = "Object";
+            }
+        }
+        //将数据库类型转换为golang类型
+        else if (languageType == 2) {
+            type = JdbcType2GolangType.map.get(fieldArr[1].toUpperCase().replaceAll("[^a-z^A-Z]", ""));
+            if (type == null) {
+                type = "interface{}";
+            }
+        } else {
+            type = "";
         }
         pojoField.setType(type);
 

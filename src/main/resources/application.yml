@@ -1,5 +1,5 @@
 server:
-  port: 80
+  port: 8090
   
 spring:
   # 页面方面的配置
@@ -17,8 +17,8 @@ spring:
   http:
     # 配置上传文件限制大小
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 20MB
+      max-request-size: 20MB
       
   resources:
     static-locations: classpath:static/,file:static/
